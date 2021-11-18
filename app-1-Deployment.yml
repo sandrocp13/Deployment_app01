@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-1
+  namespace: development
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5 
+  template:
+    metadata:
+      labels:
+        app: app-1
+        env: dev
+        tier: frontend
+        bu: finance
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: app-1
+        image: busybox
+        command:
+        - sleep
+        - "4800"
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: 256Mi
+            cpu: 100m
+          limits:
+            memory: 512Mi
+            cpu: 200m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-1
+  namespace: development
+spec:
+  ports:
+  - port: 80
+  selector:
+    app: app-1

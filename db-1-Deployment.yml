@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-1
+  namespace: development
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      env: dev
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5 
+  template:
+    metadata:
+      labels:
+        tier: db
+        env: dev
+        tier: backend
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: db-1
+        image: busybox
+        command:
+        - sleep
+        - "4800"
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: 256Mi
+            cpu: 100m
+          limits:
+            memory: 512Mi
+            cpu: 300m
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-1
+  namespace: development
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: db-1
